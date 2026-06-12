@@ -1,0 +1,24 @@
+[Unit]
+Description=ProjectReef — self-hosted task manager
+After=network.target
+
+[Service]
+Type=simple
+User=projectreef
+WorkingDirectory=/opt/projectreef
+EnvironmentFile=/opt/projectreef/.env
+ExecStart=/opt/projectreef/.venv/bin/python -m uvicorn main:app --host 0.0.0.0 --port 8000 --workers 1
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=projectreef
+
+# Hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/opt/projectreef/data
+
+[Install]
+WantedBy=multi-user.target

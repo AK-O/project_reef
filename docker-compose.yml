@@ -1,0 +1,27 @@
+services:
+  projectreef:
+    build:
+      context: .
+      args:
+        # Stamp the image with the current git version at build time.
+        # Override by setting PROJECTREEF_VERSION in your shell before building.
+        VERSION: "${PROJECTREEF_VERSION:-}"
+    image: projectreef:latest
+    restart: unless-stopped
+    ports:
+      - "${PORT:-8000}:8000"
+    volumes:
+      - projectreef-data:/data
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      # Always point the DB at the named volume regardless of .env
+      DATABASE_URL: "sqlite:////data/projectreef.db"
+      SECRET_KEY: "${SECRET_KEY}"
+      HA_URL: "${HA_URL:-}"
+      HA_TOKEN: "${HA_TOKEN:-}"
+      ALLOWED_ORIGINS: "${ALLOWED_ORIGINS:-http://localhost:8000}"
+
+volumes:
+  projectreef-data:

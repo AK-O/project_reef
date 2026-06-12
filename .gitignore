@@ -1,0 +1,48 @@
+# ── Secrets & environment ─────────────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+
+# ── User data ─────────────────────────────────────────────────────────────────
+data/
+*.db
+*.db-shm
+*.db-wal
+
+# ── Logs ──────────────────────────────────────────────────────────────────────
+*.log
+server_out.log
+server_err.log
+
+# ── Python ────────────────────────────────────────────────────────────────────
+.venv/
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# ── Testing & coverage ────────────────────────────────────────────────────────
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# ── Generated files ───────────────────────────────────────────────────────────
+# VERSION is written by the Dockerfile at build time, not a source file
+VERSION
+
+# ── Editor & OS ───────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.idea/
+.vscode/
+
+# ── Claude Code session data ──────────────────────────────────────────────────
+# CLAUDE.md is intentionally kept (project instructions for Claude Code)
+.claude/

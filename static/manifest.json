@@ -1,0 +1,21 @@
+{
+  "name": "ProjectReef",
+  "short_name": "Reef",
+  "lang": "en",
+  "description": "Self-hosted task & project manager",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#F4F7FB",
+  "theme_color": "#FF6B47",
+  "icons": [
+    { "src": "/icons/projectreef_icon.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icons/ProjectReef.png",      "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/ProjectReef.png",      "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "screenshots": [
+    { "src": "/screenshots/tasks.png",    "sizes": "457x999",  "type": "image/png", "form_factor": "narrow", "label": "Tasks" },
+    { "src": "/screenshots/projects.png", "sizes": "456x1001", "type": "image/png", "form_factor": "narrow", "label": "Projects" },
+    { "src": "/screenshots/boards.png",   "sizes": "457x1001", "type": "image/png", "form_factor": "narrow", "label": "Boards" }
+  ]
+}

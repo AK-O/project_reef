@@ -1,0 +1,17 @@
+# Normalise all text files to LF in the repo.
+# This project deploys to Linux — CRLF in shell scripts breaks them.
+* text=auto eol=lf
+
+# Explicitly binary — no line-ending conversion
+*.db     binary
+*.db-shm binary
+*.db-wal binary
+*.docx   binary
+*.png    binary
+*.jpg    binary
+*.jpeg   binary
+*.ico    binary
+*.woff   binary
+*.woff2  binary
+*.ttf    binary
+*.eot    binary

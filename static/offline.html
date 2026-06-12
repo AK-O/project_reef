@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#FF6B47">
+  <title>ProjectReef — Offline</title>
+  <style>
+    :root {
+      --bg: #F4F7FB; --text: #111827; --text-muted: #6B7280;
+      --accent: #FF6B47; --radius: 14px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      background: var(--bg); color: var(--text);
+      display: flex; align-items: center; justify-content: center;
+      padding: 24px; text-align: center;
+    }
+    .card {
+      max-width: 320px;
+      padding: 40px 32px;
+      background: #fff;
+      border-radius: var(--radius);
+      box-shadow: 0 4px 20px rgba(0,0,0,.1);
+    }
+    .icon { font-size: 56px; margin-bottom: 20px; }
+    h1 { font-size: 22px; font-weight: 800; margin-bottom: 10px; }
+    p { color: var(--text-muted); font-size: 15px; line-height: 1.6; margin-bottom: 28px; }
+    button {
+      background: var(--accent); color: #fff; border: none; cursor: pointer;
+      padding: 13px 28px; border-radius: 10px; font-size: 15px; font-weight: 600;
+      font-family: inherit; width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="icon">🌊</div>
+    <h1>You're offline</h1>
+    <p>ProjectReef can't reach the server right now. Check that your homelab is running and you're on the right network.</p>
+    <button onclick="location.reload()">Try again</button>
+  </div>
+</body>
+</html>

@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#FF6B47">
+  <title>ProjectReef</title>
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" href="/icons/projectreef_icon.ico">
+  <link rel="apple-touch-icon" href="/icons/projectreef_icon.png">
+  <link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+
+<div id="loading">
+  <img src="/icons/projectreef_icon.png" alt="ProjectReef">
+  <p>Loading ProjectReef…</p>
+</div>
+
+<div id="app">
+
+  <!-- ═══ AUTH ═════════════════════════════════════════════════════ -->
+  <div id="auth-screen" class="screen">
+    <div class="auth-logo">
+      <img src="/icons/projectreef_icon.png" alt="">
+      <h1>ProjectReef</h1>
+      <p>Capture a thought before it disappears.</p>
+    </div>
+    <div class="auth-card">
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-tab="login">Sign In</button>
+        <button class="auth-tab" data-tab="register">Register</button>
+      </div>
+
+      <form id="login-form">
+        <div class="form-group"><label>Username</label>
+          <input name="username" type="text" autocomplete="username" required placeholder="your-username"></div>
+        <div class="form-group"><label>Password</label>
+          <input name="password" type="password" autocomplete="current-password" required placeholder="••••••••"></div>
+        <button type="submit" class="btn btn-primary">Sign In</button>
+        <p class="error-msg" id="login-error"></p>
+      </form>
+
+      <form id="register-form" class="hidden">
+        <div class="form-group"><label>Username</label>
+          <input name="username" type="text" autocomplete="username" required placeholder="choose-a-username"></div>
+        <div class="form-group"><label>Email</label>
+          <input name="email" type="email" autocomplete="email" required placeholder="you@example.com"></div>
+        <div class="form-group"><label>Password</label>
+          <input name="password" type="password" autocomplete="new-password" required placeholder="min 6 characters" minlength="6"></div>
+        <div class="form-group"><label>Your timezone</label>
+          <select name="timezone" id="register-tz" class="form-select"></select></div>
+        <button type="submit" class="btn btn-primary">Create Account</button>
+        <p class="error-msg" id="register-error"></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- ═══ MAIN APP ═════════════════════════════════════════════════ -->
+  <div id="main-screen" class="screen">
+
+    <div class="main-content">
+
+    <header class="app-header">
+      <div class="header-title">
+        <img src="/icons/projectreef_icon.png" alt="">
+        <span>ProjectReef</span>
+      </div>
+      <div class="header-actions">
+        <button class="btn-icon btn-icon--lg" id="btn-profile" title="Profile"   aria-label="Profile">👤</button>
+        <button class="btn-icon btn-icon--lg" id="btn-logout"  title="Sign out" aria-label="Sign out">⏻</button>
+      </div>
+    </header>
+
+    <!-- ─── Tasks tab ─────────────────────────────────────────── -->
+    <div id="tab-tasks" class="tab-pane active">
+
+      <!-- Sticky quick-add bar -->
+      <div class="quick-add-bar">
+        <div class="quick-add-row">
+          <textarea id="quick-add-input" rows="1"
+            placeholder="Add a task… e.g. 'Call mom tomorrow 14:00'"
+            autocomplete="off" autocorrect="off" spellcheck="false"></textarea>
+          <button id="quick-add-btn" aria-label="Add task">+</button>
+        </div>
+        <div id="quick-add-preview" class="parse-preview">
+          <div class="preview-row">
+            <span id="qa-preview-title" class="preview-title"></span>
+            <span id="qa-preview-date"  class="preview-date"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Task list -->
+      <div class="tab-content">
+        <div class="filter-row">
+          <button class="filter-pill" id="flt-due-btn" type="button"><span class="pill-text">All</span><span class="flt-arrow">▾</span></button>
+          <button class="filter-pill" id="flt-project-btn" type="button"><span class="pill-text">Project</span><span class="flt-arrow">▾</span></button>
+          <button class="filter-pill" id="flt-status-btn" type="button"><span class="pill-text">Open</span><span class="flt-arrow">▾</span></button>
+          <div class="filter-secondary">
+            <button class="filter-pill sort-pill" id="sort-btn" type="button"><span class="pill-text">↕ Due date</span><span class="flt-arrow">▾</span></button>
+            <button class="filter-search-btn" id="btn-collapse-sections" title="Collapse all" aria-label="Collapse all" type="button">⊖</button>
+            <button id="flt-clear" class="flt-clear-btn hidden" type="button" aria-label="Clear filter">✕</button>
+            <button class="filter-search-btn" id="btn-search-toggle" title="Search" aria-label="Search">🔍</button>
+          </div>
+        </div>
+        <div id="search-row" class="search-row hidden">
+          <div class="search-input-wrap">
+            <span class="search-icon">🔍</span>
+            <input id="search-input" type="search" placeholder="Search tasks…" autocomplete="off">
+            <button id="search-clear" class="search-clear-btn" type="button" aria-label="Clear search">✕</button>
+          </div>
+        </div>
+        <div id="done-options-row" class="done-options-row hidden">
+          <span class="done-options-label">Completed in the last</span>
+          <select id="done-days-select">
+            <option value="1">Today</option>
+            <option value="7" selected>Last 7 days</option>
+            <option value="30">Last 30 days</option>
+            <option value="90">Last 90 days</option>
+            <option value="">All time</option>
+          </select>
+        </div>
+        <div id="inbox-list" class="task-list">
+          <div class="loading-center"><div class="spinner"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── Projects tab ─────────────────────────────────────── -->
+    <div id="tab-projects" class="tab-pane">
+
+      <!-- Grid view -->
+      <div id="projects-grid-view">
+        <div class="tab-content">
+          <div class="section-header">
+            <h2><img src="/icons/octo_icon.png" alt=""> Projects</h2>
+            <div class="section-header-actions">
+              <button class="btn btn-sm btn-ghost" id="btn-show-archive">Archive</button>
+              <button class="btn btn-sm btn-ghost" id="btn-edit-order">✎ Order</button>
+              <button class="btn btn-sm btn-ghost btn-octopus" id="btn-new-project">+ New</button>
+            </div>
+          </div>
+          <div id="project-grid" class="project-grid"></div>
+        </div>
+      </div>
+
+      <!-- Board view (replaces grid when a project is selected) -->
+      <div id="projects-board-view" style="display:none">
+        <div class="board-header">
+          <button class="btn btn-sm btn-ghost btn-back" id="btn-back-to-grid">← Back</button>
+          <button id="btn-project-nav" class="board-title-btn" title="Switch project">
+            <div id="board-project-icon" class="board-project-icon"></div>
+            <span id="board-project-title"></span>
+            <span class="nav-chevron">▾</span>
+          </button>
+          <button class="btn btn-sm btn-ghost btn-nowrap" id="btn-toggle-done">Show done</button>
+          <button class="btn btn-sm btn-ghost board-view-toggle btn-icon-board" id="btn-board-view" title="Switch to list view" aria-label="Switch to list view">☰</button>
+          <button class="btn btn-sm btn-ghost btn-icon-board" id="btn-project-menu" title="Project menu" aria-label="Project menu">⋯</button>
+        </div>
+        <div class="kanban-wrap">
+          <div id="kanban-board" class="kanban-board"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── Admin tab ─────────────────────────────────────────── -->
+    <div id="tab-admin" class="tab-pane">
+      <div class="tab-content">
+
+        <div class="admin-header">
+          <h2>Admin</h2>
+          <button class="btn btn-sm btn-ghost" id="btn-admin-refresh">↻ Refresh</button>
+        </div>
+
+        <!-- Compact horizontal stat chips -->
+        <div class="admin-stat-strip">
+          <div class="admin-chip" id="asc-open"><span class="ac-num">—</span><span class="ac-lbl">Open</span></div>
+          <div class="admin-chip" id="asc-done"><span class="ac-num">—</span><span class="ac-lbl">Done</span></div>
+          <div class="admin-chip" id="asc-overdue"><span class="ac-num">—</span><span class="ac-lbl">Overdue</span></div>
+          <div class="admin-chip" id="asc-projects"><span class="ac-num">—</span><span class="ac-lbl">Projects</span></div>
+          <div class="admin-chip" id="asc-users"><span class="ac-num">—</span><span class="ac-lbl">Users</span></div>
+        </div>
+
+        <!-- 2-column info grid: System + Database -->
+        <div class="admin-info-grid">
+          <div class="admin-section">
+            <div class="admin-section-title">System</div>
+            <div class="admin-rows" id="admin-system-rows"></div>
+          </div>
+          <div class="admin-section">
+            <div class="admin-section-header">
+              <div class="admin-section-title">Database</div>
+              <button class="admin-action-btn" id="btn-admin-vacuum" title="Reclaims space from deleted rows">Optimize</button>
+            </div>
+            <div class="admin-rows" id="admin-db-rows"></div>
+            <div class="admin-db-actions">
+              <button class="admin-action-btn danger" id="btn-purge-done">Delete done tasks</button>
+              <button class="admin-action-btn danger" id="btn-purge-archived">Delete archived projects</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Home Assistant + Environment side by side -->
+        <div class="admin-info-grid">
+          <div class="admin-section">
+            <div class="admin-section-header">
+              <div class="admin-section-title">Home Assistant</div>
+              <span id="ha-status-badge" class="admin-badge warn">Not configured</span>
+              <div class="admin-ha-actions">
+                <button class="admin-action-btn" id="btn-admin-ha-save">Save</button>
+                <button class="admin-action-btn" id="btn-admin-ha-ping">Test</button>
+              </div>
+            </div>
+            <div class="admin-ha-form">
+              <div class="admin-config-row">
+                <label class="admin-config-label">URL</label>
+                <input id="ha-url-input" type="text" class="admin-config-input" placeholder="http://192.168.x.x:8123">
+              </div>
+              <div class="admin-config-row">
+                <label class="admin-config-label">Token</label>
+                <input id="ha-token-input" type="password" class="admin-config-input" placeholder="Enter new token to update">
+              </div>
+            </div>
+          </div>
+
+          <div class="admin-section">
+            <div class="admin-section-title">Environment</div>
+            <div class="admin-rows" id="admin-env-rows"></div>
+          </div>
+        </div>
+
+        <!-- Users -->
+        <div class="admin-section">
+          <div class="admin-section-title">Users</div>
+          <div id="admin-users-body" class="admin-table-wrap"></div>
+        </div>
+
+        <!-- Projects -->
+        <div class="admin-section">
+          <div class="admin-section-title">All Projects</div>
+          <div id="admin-projects-body" class="admin-table-wrap"></div>
+        </div>
+
+      </div>
+    </div>
+
+    </div><!-- /.main-content -->
+
+    <!-- ─── Nav (bottom on mobile / sidebar on desktop) ────────── -->
+    <nav class="bottom-nav">
+      <div class="nav-brand">
+        <img src="/icons/projectreef_icon.png" alt="">
+        <span>ProjectReef</span>
+      </div>
+      <button class="nav-item active" data-tab="tasks">
+        <img src="/icons/raven_icon.png" alt="">
+        <span>Tasks</span>
+        <span class="badge" style="display:none"></span>
+      </button>
+      <button class="nav-item" data-tab="projects">
+        <img src="/icons/octo_icon.png" alt="">
+        <span>Projects</span>
+      </button>
+      <button class="nav-item" data-tab="board">
+        <img src="/icons/otter_icon.png" alt="">
+        <span>Boards</span>
+      </button>
+      <div class="nav-footer">
+        <button class="btn-icon" id="btn-profile-sb" title="Profile"   aria-label="Profile">👤</button>
+        <button class="btn-icon" id="btn-admin-sb"   title="Admin"     aria-label="Admin"   style="display:none">🛡️</button>
+        <button class="btn-icon" id="btn-logout-sb"  title="Sign out" aria-label="Sign out">⏻</button>
+      </div>
+    </nav>
+  </div>
+
+</div><!-- #app -->
+
+<div id="toast"></div>
+<div id="undo-toast"><span class="undo-msg"></span><button class="undo-btn">Undo</button></div>
+
+<!-- TASK EDIT MODAL -->
+<div id="tdet-overlay" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-title">Edit Task</div>
+    <form id="tdet-form" autocomplete="off">
+      <div class="form-group"><label>Title</label>
+        <input id="tdet-title" type="text" required placeholder="Task title"></div>
+      <div class="form-group"><label>Notes</label>
+        <textarea id="tdet-notes" placeholder="Optional notes…"></textarea></div>
+      <div class="form-group"><label>Project</label>
+        <select id="tdet-project" class="form-select"></select></div>
+      <div class="tdet-row">
+        <div class="form-group"><label>Priority</label>
+          <select id="tdet-priority" class="form-select">
+            <option value="high">⬆ High</option>
+            <option value="normal" selected>→ Normal</option>
+            <option value="low">⬇ Low</option>
+          </select></div>
+        <div class="form-group form-group-wide"><label>Due date &amp; time</label>
+          <div class="due-date-row">
+            <input id="tdet-due" type="datetime-local" class="form-select">
+            <button id="tdet-clear-due" class="btn-clear-date" type="button" title="Clear date" aria-label="Clear date">✕</button>
+          </div>
+        </div>
+      </div>
+      <div class="form-group"><label>Repeat</label>
+        <select id="tdet-recurrence" class="form-select">
+          <option value="">No repeat</option>
+          <option value="daily">Daily</option>
+          <option value="weekly">Weekly</option>
+          <option value="monthly">Monthly</option>
+          <option value="yearly">Yearly</option>
+        </select></div>
+    </form>
+
+    <!-- Sub-tasks (outside form so Enter doesn't submit) -->
+    <div id="tdet-subtasks-section" class="section-divider">
+      <div class="subtasks-header">
+        <span class="subtasks-title">Sub-tasks</span>
+        <span id="tdet-subtasks-count" class="subtasks-count"></span>
+      </div>
+      <div id="tdet-subtasks-list" class="subtasks-list"></div>
+      <div class="subtasks-add">
+        <input id="tdet-subtask-input" type="text" placeholder="+ Add sub-task… (press Enter)" autocomplete="off">
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-danger btn-sm btn-modal-delete" id="tdet-delete">Delete</button>
+      <button class="btn btn-ghost" id="tdet-cancel">Cancel</button>
+      <button class="btn btn-primary" id="tdet-save">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- NEW PROJECT MODAL -->
+<div id="modal-overlay" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-title">New Project</div>
+    <div class="form-group"><label>Name</label>
+      <input id="new-project-name" type="text" placeholder="e.g. Homelab" autocomplete="off"></div>
+    <div class="form-group"><label>Parent project (optional)</label>
+      <select id="new-project-parent" class="form-select"></select></div>
+    <p class="error-msg" id="project-error"></p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="btn-modal-cancel">Cancel</button>
+      <button class="btn btn-primary" id="btn-modal-save">Create</button>
+    </div>
+  </div>
+</div>
+
+<!-- PROFILE MODAL -->
+<div id="profile-overlay" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-title">Profile &amp; Settings</div>
+    <div class="profile-info-card">
+      <div class="label-overline">Signed in as</div>
+      <div id="profile-username" class="profile-display-name"></div>
+      <div id="profile-email"    class="profile-display-email"></div>
+    </div>
+    <form id="profile-form" autocomplete="off">
+      <div class="form-group"><label>Timezone</label>
+        <select id="profile-tz" class="form-select"></select>
+        <div class="form-hint">Used for parsing times and displaying due dates.</div>
+      </div>
+      <div class="form-group"><label>Home Assistant notify service (optional)</label>
+        <input id="profile-ha" type="text" placeholder="e.g. notify.mobile_app_andreas">
+        <div class="form-hint">Required for push reminders via Home Assistant.</div>
+      </div>
+    </form>
+
+    <!-- MCP Token -->
+    <div class="token-section">
+      <div class="token-section-title">Claude / MCP API Token</div>
+      <p id="token-none" class="token-none">No token yet.</p>
+      <div class="token-row">
+        <input id="token-display" type="password" readonly style="display:none">
+        <button id="btn-toggle-token" class="btn-icon" title="Show/hide token" aria-label="Show/hide token" style="display:none">👁</button>
+      </div>
+      <div id="token-actions" class="token-row" style="display:none">
+        <button id="btn-copy-token" class="btn btn-sm btn-ghost flex-1">📋 Copy</button>
+      </div>
+      <button id="btn-rotate-token" class="btn btn-sm btn-ghost btn-full">Generate token</button>
+      <div class="form-hint">
+        Use this as <code class="code-tag">PROJECTREEF_TOKEN</code> in your Claude Desktop MCP config.
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="profile-cancel">Cancel</button>
+      <button class="btn btn-primary" id="profile-save">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Public board (view-only, no auth required) -->
+<div id="public-board-screen" class="hidden">
+  <div class="public-board-header">
+    <span class="public-board-brand">ProjectReef</span>
+    <span id="public-board-title" class="public-board-title"></span>
+    <span class="public-board-badge">View only</span>
+  </div>
+  <div class="public-board-body">
+    <div id="public-kanban-board" class="kanban-board"></div>
+  </div>
+</div>
+
+<script src="/js/qrcode.min.js"></script>
+<script type="module" src="/js/app.js"></script>
+</body>
+</html>
