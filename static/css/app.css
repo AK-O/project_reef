@@ -1555,7 +1555,30 @@ input, textarea, select { font-family: inherit; }
 /* Admin */
 .admin-ha-actions { display: flex; gap: 6px; margin-left: auto; }
 
-/* Task edit modal */
+/* Task edit modal — flex column with scrollable body + sticky footer */
+.tdet-modal {
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  padding: 0;
+}
+.tdet-modal .modal-title {
+  flex-shrink: 0;
+  margin: 0; padding: 10px 24px;
+}
+.modal-body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 24px 12px;
+}
+.tdet-actions {
+  flex-shrink: 0;
+  margin-top: 0;
+  padding: 12px 24px calc(12px + var(--safe-bottom));
+  border-top: 1px solid var(--border);
+  background: var(--bg-card);
+}
+
 .form-group-wide                          { flex: 2; }
 .due-date-row input[type="datetime-local"] { padding: 10px 14px; }
 .section-divider  { margin-top: 20px; border-top: 1px solid var(--border); padding-top: 16px; }

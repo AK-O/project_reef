@@ -281,52 +281,54 @@
 
 <!-- TASK EDIT MODAL -->
 <div id="tdet-overlay" class="modal-overlay">
-  <div class="modal">
+  <div class="modal tdet-modal">
     <div class="modal-title">Edit Task</div>
-    <form id="tdet-form" autocomplete="off">
-      <div class="form-group"><label>Title</label>
-        <input id="tdet-title" type="text" required placeholder="Task title"></div>
-      <div class="form-group"><label>Notes</label>
-        <textarea id="tdet-notes" placeholder="Optional notes…"></textarea></div>
-      <div class="form-group"><label>Project</label>
-        <select id="tdet-project" class="form-select"></select></div>
-      <div class="tdet-row">
-        <div class="form-group"><label>Priority</label>
-          <select id="tdet-priority" class="form-select">
-            <option value="high">⬆ High</option>
-            <option value="normal" selected>→ Normal</option>
-            <option value="low">⬇ Low</option>
-          </select></div>
-        <div class="form-group form-group-wide"><label>Due date &amp; time</label>
-          <div class="due-date-row">
-            <input id="tdet-due" type="datetime-local" class="form-select">
-            <button id="tdet-clear-due" class="btn-clear-date" type="button" title="Clear date" aria-label="Clear date">✕</button>
+    <div class="modal-body">
+      <form id="tdet-form" autocomplete="off">
+        <div class="form-group"><label>Title</label>
+          <input id="tdet-title" type="text" required placeholder="Task title"></div>
+        <div class="form-group"><label>Notes</label>
+          <textarea id="tdet-notes" placeholder="Optional notes…"></textarea></div>
+        <div class="form-group"><label>Project</label>
+          <select id="tdet-project" class="form-select"></select></div>
+        <div class="tdet-row">
+          <div class="form-group"><label>Priority</label>
+            <select id="tdet-priority" class="form-select">
+              <option value="high">⬆ High</option>
+              <option value="normal" selected>→ Normal</option>
+              <option value="low">⬇ Low</option>
+            </select></div>
+          <div class="form-group form-group-wide"><label>Due date &amp; time</label>
+            <div class="due-date-row">
+              <input id="tdet-due" type="datetime-local" class="form-select">
+              <button id="tdet-clear-due" class="btn-clear-date" type="button" title="Clear date" aria-label="Clear date">✕</button>
+            </div>
           </div>
         </div>
-      </div>
-      <div class="form-group"><label>Repeat</label>
-        <select id="tdet-recurrence" class="form-select">
-          <option value="">No repeat</option>
-          <option value="daily">Daily</option>
-          <option value="weekly">Weekly</option>
-          <option value="monthly">Monthly</option>
-          <option value="yearly">Yearly</option>
-        </select></div>
-    </form>
+        <div class="form-group"><label>Repeat</label>
+          <select id="tdet-recurrence" class="form-select">
+            <option value="">No repeat</option>
+            <option value="daily">Daily</option>
+            <option value="weekly">Weekly</option>
+            <option value="monthly">Monthly</option>
+            <option value="yearly">Yearly</option>
+          </select></div>
+      </form>
 
-    <!-- Sub-tasks (outside form so Enter doesn't submit) -->
-    <div id="tdet-subtasks-section" class="section-divider">
-      <div class="subtasks-header">
-        <span class="subtasks-title">Sub-tasks</span>
-        <span id="tdet-subtasks-count" class="subtasks-count"></span>
+      <!-- Sub-tasks (outside form so Enter doesn't submit) -->
+      <div id="tdet-subtasks-section" class="section-divider">
+        <div class="subtasks-header">
+          <span class="subtasks-title">Sub-tasks</span>
+          <span id="tdet-subtasks-count" class="subtasks-count"></span>
+        </div>
+        <div id="tdet-subtasks-list" class="subtasks-list"></div>
+        <div class="subtasks-add">
+          <input id="tdet-subtask-input" type="text" placeholder="+ Add sub-task… (press Enter)" autocomplete="off">
+        </div>
       </div>
-      <div id="tdet-subtasks-list" class="subtasks-list"></div>
-      <div class="subtasks-add">
-        <input id="tdet-subtask-input" type="text" placeholder="+ Add sub-task… (press Enter)" autocomplete="off">
-      </div>
-    </div>
+    </div><!-- /.modal-body -->
 
-    <div class="modal-actions">
+    <div class="modal-actions tdet-actions">
       <button class="btn btn-danger btn-sm btn-modal-delete" id="tdet-delete">Delete</button>
       <button class="btn btn-ghost" id="tdet-cancel">Cancel</button>
       <button class="btn btn-primary" id="tdet-save">Save</button>

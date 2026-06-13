@@ -728,5 +728,4 @@ export async function openBoardPicker() {
 
   renderList("");
   searchEl.addEventListener("input", () => renderList(searchEl.value));
-  setTimeout(() => searchEl.focus(), 60);
 }

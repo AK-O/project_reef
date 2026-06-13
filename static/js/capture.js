@@ -73,7 +73,6 @@ export async function initCapture() {
     }
   }
 
-  input.focus();
 }
 
 function _populate(sel, tree, depth) {

@@ -44,10 +44,6 @@ export async function openTaskDetail(taskId, onDone) {
   const modal = overlay.querySelector(".modal");
   if (modal) modal.scrollTop = 0;
 
-  const form = document.getElementById("tdet-form");
-  form.style.opacity       = ".4";
-  form.style.pointerEvents = "none";
-
   try {
     const [task, tree] = await Promise.all([
       tasks.get(taskId),
@@ -57,9 +53,6 @@ export async function openTaskDetail(taskId, onDone) {
   } catch (err) {
     toast(`Could not load task: ${err.message}`, "error");
     _close();
-  } finally {
-    form.style.opacity       = "1";
-    form.style.pointerEvents = "";
   }
 }
 
@@ -88,11 +81,6 @@ function _fill(task, tree) {
 
   _renderSubtasks(task);
 
-  setTimeout(() => {
-    const t = document.getElementById("tdet-title");
-    t.focus();
-    t.select();
-  }, 80);
 }
 
 function _renderSubtasks(task) {
