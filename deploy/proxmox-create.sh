@@ -32,7 +32,7 @@ set -euo pipefail
 : "${CT_PASS:=}"                 # root password — prompted if blank
 
 # ProjectReef app
-: "${PR_REPO:=}"                 # git clone URL; blank = push local files
+: "${PR_REPO:=https://github.com/AK-O/project_reef}"  # default repo
 : "${PR_PORT:=8000}"
 : "${PR_HA_URL:=}"               # e.g. http://192.168.1.10:8123
 : "${PR_HA_TOKEN:=}"             # Home Assistant long-lived token
@@ -53,16 +53,23 @@ command -v pct   >/dev/null 2>&1 || error "pct not found — run this on a Proxm
 command -v pveam >/dev/null 2>&1 || error "pveam not found — run this on a Proxmox VE host"
 [[ $EUID -eq 0 ]] || error "Must run as root on the Proxmox host"
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# Detect if running via process substitution (bash <(curl ...)) — BASH_SOURCE[0]
+# would be /dev/fd/N in that case, not a real path.  Guard against tarring /dev.
+_SELF="${BASH_SOURCE[0]:-}"
+if [[ -f "$_SELF" ]]; then
+  SCRIPT_DIR="$(cd "$(dirname "$_SELF")/.." && pwd)"
+else
+  SCRIPT_DIR=""   # curl/pipe mode — local-file push is unavailable
+fi
 
 # ── Auto-detect next free CTID ────────────────────────────────────────────────
 if [[ -z "$CTID" ]]; then
-  for _id in $(seq 200 299); do
+  for _id in $(seq 100 199); do
     if ! pct status "$_id" &>/dev/null && ! qm status "$_id" &>/dev/null; then
       CTID=$_id; break
     fi
   done
-  [[ -n "${CTID:-}" ]] || error "No free container ID in range 200–299"
+  [[ -n "${CTID:-}" ]] || error "No free container ID in range 100–199"
   info "Auto-selected container ID: $CTID"
 fi
 pct status "$CTID" &>/dev/null && \
@@ -79,6 +86,7 @@ if [[ -z "$CT_PASS" ]]; then
     warn "Passwords don't match — try again"
   done
 fi
+
 
 # ── Find or download Ubuntu template ─────────────────────────────────────────
 # Prefer 24.04 (Python 3.12 built-in), fall back to 22.04
