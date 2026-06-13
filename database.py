@@ -3,7 +3,7 @@ import os
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
-from sqlalchemy import TypeDecorator, DateTime as _SADateTime, create_engine, event
+from sqlalchemy import TypeDecorator, DateTime as _SADateTime, create_engine, event, text
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
 logger = logging.getLogger(__name__)
