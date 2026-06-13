@@ -53,7 +53,7 @@ def save(data: dict) -> None:
 
 
 def get_ha_url() -> str:
-    return load().get("ha_url") or os.getenv("HA_URL", "")
+    return (load().get("ha_url") or os.getenv("HA_URL", "")).rstrip("/")
 
 
 def get_ha_token() -> str:

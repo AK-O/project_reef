@@ -42,7 +42,7 @@ async def _send_ha_notification(service: str, title: str, message: str, project:
                 resp = await client.post(url, json=payload, headers=headers)
             if resp.status_code < 300:
                 return True
-            logger.warning("HA notify attempt %d failed: %s", attempt + 1, resp.status_code)
+            logger.warning("HA notify attempt %d failed: %s — %s", attempt + 1, resp.status_code, resp.text)
         except Exception as exc:
             logger.warning("HA notify attempt %d error: %s", attempt + 1, exc)
 
