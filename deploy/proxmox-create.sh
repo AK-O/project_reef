@@ -162,7 +162,14 @@ pct create "$CTID" "${TPL_STORAGE}:vztmpl/${TEMPLATE_NAME}" \
   --features    nesting=1               \
   --onboot      1
 
-info "Container created — starting..."
+info "Container created"
+
+# TUN device access — required for Tailscale inside the LXC
+echo "lxc.cgroup2.devices.allow: c 10:200 rwm" >> /etc/pve/lxc/$CTID.conf
+echo "lxc.mount.entry: /dev/net/tun dev/net/tun none bind,create=file" >> /etc/pve/lxc/$CTID.conf
+info "TUN device configured (required for Tailscale)"
+
+info "Starting container..."
 pct start "$CTID"
 
 # ── Wait for container init to accept commands ────────────────────────────────
