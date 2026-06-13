@@ -227,6 +227,14 @@ if [[ "$STATUS" == "active" ]]; then
   echo "  2. Go to Profile → API Token to get your MCP token"
   echo "  3. Add the MCP server to Claude Desktop (see README)"
   echo ""
+
+  # ── Optional: Tailscale HTTPS ──────────────────────────────────
+  if [[ -z "${PROJECTREEF_TAILSCALE:-}" ]]; then
+    read -rp "Set up Tailscale HTTPS now? (enables PWA standalone mode) [y/N]: " PROJECTREEF_TAILSCALE
+  fi
+  if [[ "${PROJECTREEF_TAILSCALE,,}" =~ ^y ]]; then
+    bash "$INSTALL_DIR/deploy/enable-https.sh"
+  fi
 else
   error "Service did not start. Check: journalctl -u $SERVICE_NAME -n 50"
 fi
