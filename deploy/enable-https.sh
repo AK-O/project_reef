@@ -35,7 +35,23 @@ else
   info "Tailscale $(tailscale version | head -1) already present"
 fi
 
-systemctl enable --now tailscaled 2>/dev/null || true
+# Kill any stale tailscaled process not managed by systemd
+if pgrep -x tailscaled &>/dev/null && ! systemctl is-active tailscaled &>/dev/null; then
+  warn "Stopping stale tailscaled process..."
+  pkill -x tailscaled || true
+  sleep 1
+fi
+
+systemctl enable tailscaled 2>/dev/null || true
+systemctl start tailscaled 2>/dev/null || true
+
+# Wait up to 10 s for the socket to appear
+info "Waiting for tailscaled socket..."
+for i in {1..10}; do
+  [[ -S /var/run/tailscale/tailscaled.sock ]] && break
+  sleep 1
+done
+[[ -S /var/run/tailscale/tailscaled.sock ]] || error "tailscaled socket never appeared — check: journalctl -u tailscaled -n 20"
 
 # ── Authenticate ──────────────────────────────────────────────────
 if ! tailscale status &>/dev/null; then
