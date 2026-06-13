@@ -245,6 +245,7 @@ function _setupFilters() {
     _setPillLabel("flt-status-btn", "Open", false);
     doneRow?.classList.add("hidden");
     _sync(); _loadTasks();
+    toast("Filters cleared", "success");
   });
 
   daysSel?.addEventListener("change", (e) => {
@@ -363,9 +364,15 @@ async function _loadTasks() {
     // Render
     list.innerHTML = "";
     if (!items.length) {
-      const icon = isDone ? "✓" : "✨";
-      const msg  = isDone ? "No completed tasks" : "All clear!";
-      list.innerHTML = `<div class="empty-state"><div class="empty-icon">${icon}</div><p>${msg}</p><small>Nothing matches the active filters</small></div>`;
+      const hasFilter = _fltDue || _fltProject || _fltStatus || _searchQuery;
+      const icon = isDone ? "✓" : (_searchQuery ? "🔍" : "✨");
+      const msg  = isDone
+        ? "No completed tasks"
+        : (_searchQuery ? "No results" : (hasFilter ? "Nothing matches" : "All clear!"));
+      const sub  = _searchQuery
+        ? `No tasks match "${_searchQuery}"`
+        : (hasFilter ? "Try changing or clearing the filters" : "Add a task above to get started");
+      list.innerHTML = `<div class="empty-state"><div class="empty-icon">${icon}</div><p>${msg}</p><small>${sub}</small></div>`;
       _updateBadge(overdueItems.length);
       return;
     }

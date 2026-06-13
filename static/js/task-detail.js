@@ -3,7 +3,7 @@
  * openTaskDetail(taskId, onDone?) from any tab.
  */
 import { tasks, projects } from "./api.js";
-import { toast, utcToLocalInput, localInputToISO, addSwipeToDismiss } from "./utils.js";
+import { toast, utcToLocalInput, localInputToISO, addSwipeToDismiss, showConfirm } from "./utils.js";
 
 let _taskId  = null;
 let _onDone  = null;
@@ -19,6 +19,7 @@ export function initTaskDetail() {
   overlay.addEventListener("click",  (e) => { if (e.target === overlay) _close(); });
   const sheet = overlay.querySelector(".modal");
   if (sheet) addSwipeToDismiss(overlay, sheet, _close);
+  document.getElementById("tdet-close")?.addEventListener("click",  _close);
   document.getElementById("tdet-cancel").addEventListener("click",  _close);
   document.getElementById("tdet-save").addEventListener("click",    _save);
   document.getElementById("tdet-delete").addEventListener("click",  _delete);
@@ -131,13 +132,19 @@ function _appendSubtaskRow(list, sub) {
     <button class="subtask-del" type="button" title="Delete subtask">✕</button>`;
 
   row.querySelector(".subtask-check").addEventListener("click", async (e) => {
-    const check = e.currentTarget;
-    if (check.classList.contains("done")) return;
+    const check  = e.currentTarget;
+    const isDone = check.classList.contains("done");
     try {
-      await tasks.complete(sub.id);
-      check.classList.add("done");
-      row.querySelector(".subtask-title").classList.add("done");
-      const l     = document.getElementById("tdet-subtasks-list");
+      if (isDone) {
+        await tasks.uncomplete(sub.id);
+        check.classList.remove("done");
+        row.querySelector(".subtask-title").classList.remove("done");
+      } else {
+        await tasks.complete(sub.id);
+        check.classList.add("done");
+        row.querySelector(".subtask-title").classList.add("done");
+      }
+      const l      = document.getElementById("tdet-subtasks-list");
       const doneCt = l.querySelectorAll(".subtask-check.done").length;
       _updateSubtaskCount(l.querySelectorAll(".subtask-row").length, doneCt);
       window.dispatchEvent(new CustomEvent("tasks:changed"));
@@ -205,7 +212,7 @@ async function _save() {
 }
 
 async function _delete() {
-  if (!confirm("Delete this task?")) return;
+  if (!await showConfirm("Delete this task?", { confirmText: "Delete", danger: true })) return;
   try {
     await tasks.delete(_taskId);
     _close();

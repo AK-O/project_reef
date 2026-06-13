@@ -377,7 +377,10 @@ input, textarea, select { font-family: inherit; }
   width: 26px; height: 26px; min-width: 26px; border-radius: 50%;
   border: 2px solid var(--border); display: flex; align-items: center; justify-content: center;
   margin-top: 1px; transition: all .15s; flex-shrink: 0; touch-action: manipulation;
+  position: relative; cursor: pointer;
 }
+/* Invisible tap-target halo — makes hitbox 44×44px on touch */
+.task-check::before { content: ""; position: absolute; inset: -9px; border-radius: 50%; }
 .task-check:hover { border-color: var(--success); }
 .task-check.done  { background: var(--success); border-color: var(--success); }
 .task-check.done::after { content: "✓"; color: #fff; font-size: 11px; font-weight: 900; }
@@ -1018,7 +1021,7 @@ input, textarea, select { font-family: inherit; }
   touch-action: manipulation;
 }
 .subtask-check:hover { border-color: var(--success); }
-.subtask-check.done { background: var(--success); border-color: var(--success); cursor: default; }
+.subtask-check.done { background: var(--success); border-color: var(--success); cursor: pointer; }
 .subtask-check.done::after { content: "✓"; color: #fff; font-size: 10px; font-weight: 900; }
 .subtask-title { flex: 1; font-size: 14px; min-width: 0; }
 .subtask-title.done { text-decoration: line-through; color: var(--text-muted); }
@@ -1191,7 +1194,8 @@ input, textarea, select { font-family: inherit; }
   /* Filter row: compact pills — all fit in one row */
   .filter-row { gap: 4px; }
   .filter-secondary { margin-left: 0; gap: 4px; }
-  .filter-pill { font-size: 12px; padding: 5px 10px; min-height: 34px; max-width: 100px; overflow: hidden; }
+  .filter-pill { font-size: 12px; padding: 5px 10px; min-height: 34px; max-width: 130px; }
+  .filter-pill .pill-text { max-width: 90px; overflow: hidden; text-overflow: ellipsis; }
   .filter-search-btn { padding: 5px 8px; font-size: 14px; min-height: 34px; }
   .flt-clear-btn { padding: 5px 10px; font-size: 12px; min-height: 34px; }
 }
@@ -1563,8 +1567,17 @@ input, textarea, select { font-family: inherit; }
 }
 .tdet-modal .modal-title {
   flex-shrink: 0;
-  margin: 0; padding: 10px 24px;
+  margin: 0; padding: 10px 16px 10px 24px;
+  display: flex; align-items: center; justify-content: space-between;
 }
+.modal-close-btn {
+  width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-dim); font-size: 18px; line-height: 1;
+  transition: background .12s, color .12s;
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+}
+.modal-close-btn:hover { background: var(--bg-hover); color: var(--text); }
 .modal-body {
   flex: 1 1 auto;
   overflow-y: auto;
@@ -1615,3 +1628,36 @@ input, textarea, select { font-family: inherit; }
 .flex-1   { flex: 1; }
 .btn-full { width: 100%; }
 .code-tag { background: var(--bg-input); padding: 1px 6px; border-radius: 4px; font-size: 11px; }
+
+/* ── Custom confirm / prompt bottom-sheet ─────────────────────────── */
+.confirm-overlay {
+  position: fixed; inset: 0; z-index: 3000;
+  background: rgba(0,0,0,.45);
+  display: flex; align-items: flex-end; justify-content: center;
+  opacity: 0; transition: opacity .22s; pointer-events: none;
+}
+.confirm-overlay.open { opacity: 1; pointer-events: auto; }
+.confirm-sheet {
+  width: 100%; max-width: 480px;
+  background: var(--bg-card);
+  border-radius: var(--radius) var(--radius) 0 0;
+  padding: 24px 20px calc(20px + var(--safe-bottom));
+  box-shadow: var(--shadow-lg);
+  transform: translateY(100%);
+  transition: transform .22s cubic-bezier(.32,0,.15,1);
+}
+.confirm-overlay.open .confirm-sheet { transform: translateY(0); }
+.confirm-msg {
+  font-size: 16px; font-weight: 500; color: var(--text);
+  margin: 0 0 20px; line-height: 1.5; text-align: center;
+}
+.confirm-input {
+  width: 100%; padding: 12px 14px; margin-bottom: 20px;
+  background: var(--bg-input); border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm); color: var(--text);
+  font-size: 16px; outline: none; box-sizing: border-box;
+  transition: border-color .15s;
+}
+.confirm-input:focus { border-color: var(--raven); }
+.confirm-actions { display: flex; gap: 10px; }
+.confirm-actions .btn { flex: 1; justify-content: center; }

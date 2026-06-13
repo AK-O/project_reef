@@ -1,6 +1,6 @@
 /** Profile / settings bottom-sheet */
 import { auth } from "./api.js";
-import { toast, setDisplayTimezone } from "./utils.js";
+import { toast, setDisplayTimezone, showConfirm } from "./utils.js";
 import { getTimezoneGroups } from "./timezones.js";
 
 let _user    = null;
@@ -75,7 +75,7 @@ async function _save() {
 }
 
 async function _rotate() {
-  if (!confirm("Generate a new token? The old one stops working immediately.")) return;
+  if (!await showConfirm("Generate a new token? The old one stops working immediately.", { confirmText: "Generate", danger: true })) return;
   const btn = document.getElementById("btn-rotate-token");
   btn.disabled = true;
   try {

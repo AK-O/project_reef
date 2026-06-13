@@ -116,6 +116,75 @@ export function formatDateTime(iso) {
   }).format(new Date(iso));
 }
 
+function _escHtml(s) {
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+/**
+ * Mobile-friendly confirm dialog — replaces browser confirm().
+ * Returns Promise<boolean>.
+ */
+export function showConfirm(message, { confirmText = "Confirm", danger = false } = {}) {
+  return new Promise(resolve => {
+    const overlay = document.createElement("div");
+    overlay.className = "confirm-overlay";
+    overlay.innerHTML = `
+      <div class="confirm-sheet">
+        <p class="confirm-msg">${_escHtml(message)}</p>
+        <div class="confirm-actions">
+          <button class="btn btn-ghost confirm-cancel">Cancel</button>
+          <button class="btn ${danger ? "btn-danger" : "btn-primary"} confirm-ok">${_escHtml(confirmText)}</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    requestAnimationFrame(() => overlay.classList.add("open"));
+    const close = (result) => {
+      overlay.classList.remove("open");
+      setTimeout(() => overlay.remove(), 220);
+      resolve(result);
+    };
+    overlay.querySelector(".confirm-ok").addEventListener("click", () => close(true));
+    overlay.querySelector(".confirm-cancel").addEventListener("click", () => close(false));
+    overlay.addEventListener("click", e => { if (e.target === overlay) close(false); });
+  });
+}
+
+/**
+ * Mobile-friendly prompt dialog — replaces browser prompt().
+ * Returns Promise<string|null> (null = cancelled).
+ */
+export function showPrompt(message, defaultValue = "") {
+  return new Promise(resolve => {
+    const overlay = document.createElement("div");
+    overlay.className = "confirm-overlay";
+    overlay.innerHTML = `
+      <div class="confirm-sheet">
+        <p class="confirm-msg">${_escHtml(message)}</p>
+        <input class="confirm-input" type="text" value="${_escHtml(defaultValue)}" autocomplete="off">
+        <div class="confirm-actions">
+          <button class="btn btn-ghost confirm-cancel">Cancel</button>
+          <button class="btn btn-primary confirm-ok">OK</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    requestAnimationFrame(() => overlay.classList.add("open"));
+    const input = overlay.querySelector(".confirm-input");
+    const close = (result) => {
+      overlay.classList.remove("open");
+      setTimeout(() => overlay.remove(), 220);
+      resolve(result);
+    };
+    setTimeout(() => { input.focus(); input.select(); }, 120);
+    overlay.querySelector(".confirm-ok").addEventListener("click", () => close(input.value.trim() || null));
+    overlay.querySelector(".confirm-cancel").addEventListener("click", () => close(null));
+    overlay.addEventListener("click", e => { if (e.target === overlay) close(null); });
+    input.addEventListener("keydown", e => {
+      if (e.key === "Enter")  { e.preventDefault(); close(input.value.trim() || null); }
+      if (e.key === "Escape") close(null);
+    });
+  });
+}
+
 /**
  * Wire swipe-to-dismiss on a bottom-sheet modal.
  * Drag starts only when the touch begins in the top HANDLE_ZONE px of sheetEl

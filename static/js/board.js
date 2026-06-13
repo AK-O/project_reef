@@ -1,6 +1,6 @@
 /** Kanban renderer — v10. Renders into a provided container element. */
 import { tasks, projects, buckets } from "./api.js";
-import { toast, formatDue, formatCompleted } from "./utils.js";
+import { toast, formatDue, formatCompleted, showConfirm, showPrompt } from "./utils.js";
 import { openTaskDetail } from "./task-detail.js";
 
 // ── Responsive mode ───────────────────────────────────────────────
@@ -403,16 +403,20 @@ function _showColMenu(e, bucket, project, container, showCompleted) {
     <button class="col-dropdown-item danger" data-action="delete">🗑 Delete column</button>`;
   document.body.appendChild(menu);
 
-  const rect = e.currentTarget.getBoundingClientRect();
-  menu.style.top  = `${rect.bottom + 4}px`;
-  menu.style.left = `${rect.left}px`;
+  const rect    = e.currentTarget.getBoundingClientRect();
+  const menuH   = 80;
+  const spaceB  = window.innerHeight - rect.bottom - 4;
+  menu.style.left = `${Math.min(rect.left, window.innerWidth - 180)}px`;
+  menu.style.top  = spaceB >= menuH
+    ? `${rect.bottom + 4}px`
+    : `${Math.max(4, rect.top - menuH - 4)}px`;
 
   const close = () => menu.remove();
   setTimeout(() => document.addEventListener("click", close, { once: true }), 0);
 
   menu.querySelector('[data-action="rename"]').addEventListener("click", async () => {
     close();
-    const name = prompt("New column name:", bucket.name);
+    const name = await showPrompt("New column name:", bucket.name);
     if (!name?.trim() || name.trim() === bucket.name) return;
     try {
       await buckets.update(bucket.id, { name: name.trim() });
@@ -423,7 +427,7 @@ function _showColMenu(e, bucket, project, container, showCompleted) {
 
   menu.querySelector('[data-action="delete"]').addEventListener("click", async () => {
     close();
-    if (!confirm(`Delete column "${bucket.name}"?\nTasks in this column will become unsorted.`)) return;
+    if (!await showConfirm(`Delete column "${bucket.name}"? Tasks will become unsorted.`, { confirmText: "Delete", danger: true })) return;
     try {
       await buckets.delete(bucket.id);
       toast("Column deleted", "success");
