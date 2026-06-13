@@ -7,13 +7,19 @@
 
 set -euo pipefail
 
+# Source config injected by proxmox-create.sh (no-op for standalone installs)
+if [[ -f /tmp/reef-env.sh ]]; then
+  source /tmp/reef-env.sh
+  rm -f /tmp/reef-env.sh
+fi
+
 # ── Config ────────────────────────────────────────────────────────
 REPO_URL="${PROJECTREEF_REPO:-}"        # set via env or prompted below
 INSTALL_DIR="/opt/projectreef"
 DATA_DIR="$INSTALL_DIR/data"
 APP_USER="projectreef"
 SERVICE_NAME="projectreef"
-PYTHON="python3.12"
+PYTHON=""  # resolved below
 
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; NC='\033[0m'
 info()    { echo -e "${GREEN}[projectreef]${NC} $*"; }
@@ -59,18 +65,30 @@ fi
 # ── System packages ───────────────────────────────────────────────
 info "Updating packages..."
 apt-get update -qq
+apt-get install -y --no-install-recommends git curl -qq
 
-if ! command -v $PYTHON &>/dev/null; then
-  info "Installing Python 3.12..."
-  apt-get install -y software-properties-common -qq
-  add-apt-repository -y ppa:deadsnakes/ppa
-  apt-get update -qq
-  apt-get install -y python3.12 python3.12-venv python3.12-dev -qq
-else
+# Resolve Python 3.12 — Ubuntu 24.04 ships it in main; 22.04 needs deadsnakes
+if command -v python3.12 &>/dev/null && python3.12 -m venv --help &>/dev/null 2>&1; then
+  PYTHON=python3.12
   info "Python 3.12 already present"
+elif command -v python3.12 &>/dev/null; then
+  apt-get install -y python3.12-venv -qq
+  PYTHON=python3.12
+  info "Python 3.12 present (installed venv support)"
+else
+  info "Installing Python 3.12..."
+  # Try main repo first (works on Ubuntu 24.04+), then deadsnakes (for 22.04)
+  if apt-get install -y python3.12 python3.12-venv python3.12-dev -qq 2>/dev/null; then
+    PYTHON=python3.12
+  else
+    apt-get install -y software-properties-common -qq
+    add-apt-repository -y ppa:deadsnakes/ppa
+    apt-get update -qq
+    apt-get install -y python3.12 python3.12-venv python3.12-dev -qq
+    PYTHON=python3.12
+  fi
 fi
-
-apt-get install -y git curl -qq
+info "Using: $($PYTHON --version)"
 
 # ── App user ──────────────────────────────────────────────────────
 if ! id "$APP_USER" &>/dev/null; then

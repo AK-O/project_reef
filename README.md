@@ -412,7 +412,7 @@ pytest tests/test_nlp.py::test_german_relative -v
 
 ### 1. Create the LXC container
 
-In Proxmox, create an Ubuntu 22.04 container (unprivileged is fine):
+In Proxmox, create an Ubuntu 24.04 container (unprivileged is fine; 22.04 also works):
 
 - **RAM:** 256 MB minimum, 512 MB recommended
 - **Disk:** 2 GB minimum
@@ -427,7 +427,7 @@ apt update && apt upgrade -y
 apt install -y python3.12 python3.12-venv python3.12-dev git
 ```
 
-> If Python 3.12 is not available in the default repos, add the deadsnakes PPA:
+> Ubuntu 24.04 ships Python 3.12 in main. On Ubuntu 22.04 it is not in the default repos — add the deadsnakes PPA first:
 > ```bash
 > apt install -y software-properties-common
 > add-apt-repository ppa:deadsnakes/ppa
@@ -635,35 +635,67 @@ volumes:
 
 ## Production Setup — Proxmox (one-command)
 
-`deploy/proxmox-create.sh` runs on the **Proxmox host** and does everything end-to-end:
-
-1. Downloads an Ubuntu 22.04 template if not already present
-2. Creates an unprivileged LXC container (`nesting=1` for Docker-in-LXC if needed later)
-3. Starts the container and waits for networking
-4. Copies or clones the ProjectReef source
-5. Runs `deploy/install.sh` non-interactively inside the container
+Run this on the **Proxmox host** as root — it creates the LXC, installs ProjectReef, and starts the service. No files need to be on the host first.
 
 ```bash
-# On the Proxmox host, from the ProjectReef source directory:
-bash deploy/proxmox-create.sh
-
-# Or pass the git repo URL to clone directly inside the container:
-PROJECTREEF_REPO=https://github.com/AK-O/project_reef bash deploy/proxmox-create.sh
+bash <(curl -fsSL https://raw.githubusercontent.com/AK-O/project_reef/main/deploy/proxmox-create.sh)
 ```
 
-The script prompts for: container ID, hostname, storage pool, bridge, IP/CIDR, gateway, RAM, disk, cores, root password, and the ProjectReef-specific options (port, HA URL/token, extra CORS origin).
+The script asks for a container root password (the only required prompt) and optionally a git repo URL. Everything else auto-detects or uses sensible defaults: next free container ID ≥ 200, DHCP networking, Ubuntu 24.04, 512 MB RAM, 8 GB disk.
 
-After completion it prints the container's IP and management commands:
+### Fully non-interactive
+
+Pre-set any variable as an env var to skip its prompt entirely:
+
+```bash
+CT_IP=192.168.1.50/24  CT_GW=192.168.1.1  CT_PASS=secret \
+PR_REPO=https://github.com/AK-O/project_reef \
+bash <(curl -fsSL https://raw.githubusercontent.com/AK-O/project_reef/main/deploy/proxmox-create.sh)
+```
+
+### Available options
+
+| Variable | Default | Description |
+|---|---|---|
+| `CTID` | auto (first free ≥ 200) | LXC container ID |
+| `CT_HOSTNAME` | `projectreef` | Container hostname |
+| `STORAGE` | `local-lvm` | Rootfs storage pool |
+| `TPL_STORAGE` | `local` | Template storage |
+| `BRIDGE` | `vmbr0` | Proxmox network bridge |
+| `CT_IP` | `dhcp` | `192.168.x.x/24` or `dhcp` |
+| `CT_GW` | — | Gateway IP (required for static IP) |
+| `CT_DNS` | `1.1.1.1 8.8.8.8` | Nameservers, space-separated |
+| `CT_RAM` | `512` | Memory in MB |
+| `CT_SWAP` | `512` | Swap in MB |
+| `CT_DISK` | `8` | Root disk in GB |
+| `CT_CORES` | `2` | vCPU count |
+| `CT_PASS` | — | Root password — prompted if blank |
+| `PR_REPO` | — | Git clone URL; blank = push local files |
+| `PR_PORT` | `8000` | App listening port |
+| `PR_HA_URL` | — | Home Assistant base URL |
+| `PR_HA_TOKEN` | — | Home Assistant long-lived token |
+| `PR_EXTRA_ORIGIN` | — | Extra CORS origin or Tailscale hostname |
+
+### What the script does
+
+1. Auto-detects the next free container ID (≥ 200)
+2. Downloads Ubuntu 24.04 template if not present (falls back to 22.04)
+3. Creates an unprivileged LXC with `nesting=1`, swap, and nameservers configured
+4. Waits for the container to boot, then waits for DNS resolution before proceeding
+5. Injects a fallback `resolv.conf` automatically if DNS is slow to come up
+6. Pushes a properly-quoted config env file into the container
+7. Runs `deploy/install.sh` non-interactively (Python 3.12, venv, systemd service)
+
+After completion it prints the container IP and management commands:
 
 ```
-  Container ID : 200
-  Hostname     : projectreef
-  IP           : 192.168.1.50
-  URL          : http://192.168.1.50:8000
+  Container:       200  (projectreef)
+  IP address:      192.168.1.50
+  App URL:         http://192.168.1.50:8000
 
-  Manage:  pct start/stop/enter 200
-  Logs:    pct exec 200 -- journalctl -u projectreef -f
-  Update:  pct exec 200 -- bash /opt/projectreef/deploy/update.sh
+  pct enter 200
+  pct exec  200 -- journalctl -u projectreef -f
+  pct exec  200 -- bash /opt/projectreef/deploy/update.sh
 ```
 
 ---
