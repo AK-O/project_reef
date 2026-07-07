@@ -217,7 +217,13 @@ export function addSwipeToDismiss(overlay, sheetEl, closeFn) {
     sheetEl.style.transition = "";
     if (deltaY > DISMISS_PX) {
       sheetEl.style.transform = "translateY(100%)";
-      setTimeout(closeFn, 180);
+      setTimeout(() => {
+        closeFn();
+        // Clear the inline transform now that the sheet is hidden — otherwise
+        // it permanently overrides the CSS open/close transform on the next
+        // open, leaving the sheet stuck off-screen behind the backdrop.
+        sheetEl.style.transform = "";
+      }, 180);
     } else {
       sheetEl.style.transform = "";
     }
