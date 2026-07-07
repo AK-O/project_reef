@@ -19,7 +19,7 @@ export function isAuthenticated() {
 // backgrounded, wifi<->cellular handover) without ever resolving or
 // rejecting it. Without a hard timeout, that leaves save buttons/spinners
 // stuck forever — a plain fetch() has no built-in deadline.
-const REQUEST_TIMEOUT_MS = 20000;
+const REQUEST_TIMEOUT_MS = 12000;
 
 async function request(method, path, body = null, params = null) {
   const url = new URL(path, window.location.origin);

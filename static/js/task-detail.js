@@ -50,8 +50,14 @@ export async function openTaskDetail(taskId, onDone) {
       tasks.get(taskId),
       projects.list().catch(() => []),
     ]);
+    // A slow/stalled request can settle long after the user moved on
+    // (dismissed this modal, opened a different task). Only act on it if
+    // we're still the current request — otherwise this would stomp on
+    // whatever's on screen now, e.g. force-closing an unrelated task.
+    if (_taskId !== taskId) return;
     _fill(task, tree);
   } catch (err) {
+    if (_taskId !== taskId) return;
     toast(`Could not load task: ${err.message}`, "error");
     _close();
   }
