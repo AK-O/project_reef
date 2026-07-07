@@ -1,8 +1,8 @@
-// ProjectReef service worker — v3
+// ProjectReef service worker — v4
 // Network-first for JS/CSS so code updates are always picked up.
 // Cache-first only for images/icons.
 
-const CACHE = "projectreef-v57";
+const CACHE = "projectreef-v58";
 
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(["/", "/manifest.json", "/offline.html"])));

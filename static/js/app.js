@@ -187,11 +187,4 @@ window.addEventListener("projects:goto-board", (e) => {
   switchTab("projects", { url: `/projects/${e.detail.projectId}` });
 });
 
-// Clear any stale SW caches on load
-if ("caches" in window) {
-  caches.keys().then((keys) =>
-    keys.filter(k => k !== "projectreef-v51").forEach(k => caches.delete(k))
-  );
-}
-
 boot();

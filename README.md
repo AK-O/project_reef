@@ -282,7 +282,7 @@ POST {HA_URL}/api/services/notify/{service_name}
 Authorization: Bearer {HA_TOKEN}
 {
   "message": "<task title>",
-  "title": "ProjectReef Reminder",
+  "title": "To Do: <task title>",
   "data": {"project": "<project name>"}
 }
 ```

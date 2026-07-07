@@ -3,7 +3,7 @@
  * openTaskDetail(taskId, onDone?) from any tab.
  */
 import { tasks, projects } from "./api.js";
-import { toast, utcToLocalInput, localInputToISO, addSwipeToDismiss, showConfirm } from "./utils.js";
+import { toast, toastUndo, utcToLocalInput, localInputToISO, addSwipeToDismiss, showConfirm } from "./utils.js";
 
 let _taskId  = null;
 let _onDone  = null;
@@ -151,16 +151,38 @@ function _appendSubtaskRow(list, sub) {
     } catch (err) { toast(err.message, "error"); }
   });
 
-  row.querySelector(".subtask-del").addEventListener("click", async () => {
-    try {
-      await tasks.delete(sub.id);
-      row.remove();
-      const l     = document.getElementById("tdet-subtasks-list");
-      const rows  = l.querySelectorAll(".subtask-row");
-      const doneCt = l.querySelectorAll(".subtask-check.done").length;
+  row.querySelector(".subtask-del").addEventListener("click", () => {
+    // No undelete endpoint exists, so soft-delete client-side: hide the row
+    // immediately but delay the actual API call so an accidental tap can
+    // still be undone via the toast.
+    row.style.display = "none";
+    const refreshCount = () => {
+      const l    = document.getElementById("tdet-subtasks-list");
+      const rows = [...l.querySelectorAll(".subtask-row")].filter(r => r.style.display !== "none");
+      const doneCt = rows.filter(r => r.querySelector(".subtask-check").classList.contains("done")).length;
       _updateSubtaskCount(rows.length, doneCt);
-      window.dispatchEvent(new CustomEvent("tasks:changed"));
-    } catch (err) { toast(err.message, "error"); }
+    };
+    refreshCount();
+
+    let undone = false;
+    toastUndo("Sub-task deleted", () => {
+      undone = true;
+      row.style.display = "";
+      refreshCount();
+    });
+
+    setTimeout(async () => {
+      if (undone) return;
+      try {
+        await tasks.delete(sub.id);
+        row.remove();
+        window.dispatchEvent(new CustomEvent("tasks:changed"));
+      } catch (err) {
+        toast(err.message, "error");
+        row.style.display = "";
+        refreshCount();
+      }
+    }, 5000);
   });
 
   list.appendChild(row);

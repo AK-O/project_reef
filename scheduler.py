@@ -32,7 +32,7 @@ async def _send_ha_notification(service: str, title: str, message: str, project:
     headers = {"Authorization": f"Bearer {ha_token}", "Content-Type": "application/json"}
     payload = {
         "message": title,
-        "title": "ProjectReef Reminder",
+        "title": f"To Do: {title}",
         "data": {"project": project},
     }
 

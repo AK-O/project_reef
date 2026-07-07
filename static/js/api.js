@@ -15,6 +15,12 @@ export function isAuthenticated() {
   return !!getToken();
 }
 
+// Mobile browsers/PWAs can suspend an in-flight fetch (screen lock, app
+// backgrounded, wifi<->cellular handover) without ever resolving or
+// rejecting it. Without a hard timeout, that leaves save buttons/spinners
+// stuck forever — a plain fetch() has no built-in deadline.
+const REQUEST_TIMEOUT_MS = 20000;
+
 async function request(method, path, body = null, params = null) {
   const url = new URL(path, window.location.origin);
   if (params) {
@@ -30,7 +36,17 @@ async function request(method, path, body = null, params = null) {
   const opts = { method, headers };
   if (body !== null) opts.body = JSON.stringify(body);
 
-  const resp = await fetch(url.toString(), opts);
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  let resp;
+  try {
+    resp = await fetch(url.toString(), { ...opts, signal: controller.signal });
+  } catch (err) {
+    if (err.name === "AbortError") throw new Error("Request timed out — check your connection and try again");
+    throw new Error("Network error — check your connection and try again");
+  } finally {
+    clearTimeout(timer);
+  }
 
   if (resp.status === 401) {
     setToken(null);

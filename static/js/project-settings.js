@@ -398,6 +398,8 @@ export function openProjectSettings(project, flatProjects, { onSave } = {}) {
 
     if (!Object.keys(patch).length) { _close(); return; }
 
+    saveBtn.disabled = true;
+    saveBtn.textContent = "…";
     try {
       const updated = await projectsApi.update(_project.id, patch);
       cacheProjectSettings([updated]);
@@ -406,6 +408,9 @@ export function openProjectSettings(project, flatProjects, { onSave } = {}) {
       if (_onSave) _onSave(updated);
     } catch (err) {
       toast(err.message, "error");
+    } finally {
+      saveBtn.disabled = false;
+      saveBtn.textContent = "Save";
     }
   });
 
