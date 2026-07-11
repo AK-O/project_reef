@@ -92,9 +92,10 @@ def get_stats(
 
 @router.get("/ha-config")
 def get_ha_config(current_user: User = Depends(get_admin_user)):
-    url   = cfg.get_ha_url()
-    token = cfg.get_ha_token()
-    return {"url": url, "token_set": bool(token)}
+    url     = cfg.get_ha_url()
+    token   = cfg.get_ha_token()
+    app_url = cfg.get_app_url()
+    return {"url": url, "token_set": bool(token), "app_url": app_url}
 
 
 @router.patch("/ha-config")
@@ -107,6 +108,8 @@ def update_ha_config(
         s["ha_url"] = body.url.strip()
     if body.token is not None and body.token.strip():
         s["ha_token"] = body.token.strip()
+    if body.app_url is not None:
+        s["app_url"] = body.app_url.strip()
     cfg.save(s)
     return {"ok": True}
 

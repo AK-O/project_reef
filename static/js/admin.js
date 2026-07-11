@@ -78,12 +78,13 @@ async function _purgeArchived() {
 }
 
 async function _saveHa() {
-  const url   = document.getElementById("ha-url-input")?.value.trim();
-  const token = document.getElementById("ha-token-input")?.value.trim();
+  const url     = document.getElementById("ha-url-input")?.value.trim();
+  const token   = document.getElementById("ha-token-input")?.value.trim();
+  const appUrl  = document.getElementById("ha-app-url-input")?.value.trim();
   const btn = document.getElementById("btn-admin-ha-save");
   btn.disabled = true; btn.textContent = "…";
   try {
-    await admin.updateHa({ url, token: token || undefined });
+    await admin.updateHa({ url, token: token || undefined, app_url: appUrl });
     document.getElementById("ha-token-input").value = "";
     toast("HA config saved ✓", "success");
     await _refresh();
@@ -189,6 +190,8 @@ function _renderDb(s) {
 function _renderHa(haConf) {
   const urlInput = document.getElementById("ha-url-input");
   if (urlInput && !urlInput.dataset.dirty) urlInput.value = haConf.url || "";
+  const appUrlInput = document.getElementById("ha-app-url-input");
+  if (appUrlInput && !appUrlInput.dataset.dirty) appUrlInput.value = haConf.app_url || "";
   const statusEl = document.getElementById("ha-status-badge");
   if (statusEl) {
     statusEl.className = "admin-badge " + (haConf.url ? "ok" : "warn");

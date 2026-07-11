@@ -44,6 +44,7 @@ class UserAdminUpdate(BaseModel):
 class HaConfigUpdate(BaseModel):
     url: Optional[str] = None
     token: Optional[str] = None
+    app_url: Optional[str] = None
 
 
 class ProjectOwnerUpdate(BaseModel):

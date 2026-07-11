@@ -283,9 +283,15 @@ Authorization: Bearer {HA_TOKEN}
 {
   "message": "<task title>",
   "title": "To Do: <task title>",
-  "data": {"project": "<project name>"}
+  "data": {
+    "project": "<project name>",
+    "url": "<app_url>/tasks?task=<task_id>",         // iOS companion app
+    "clickAction": "<app_url>/tasks?task=<task_id>"  // Android companion app
+  }
 }
 ```
+
+The `url`/`clickAction` fields are only included when **App URL** is configured (Admin panel → Home Assistant → App URL, or the `APP_URL` env var). This makes tapping the notification open the task directly in ProjectReef instead of Home Assistant. Leave it blank to keep the companion app's default behaviour.
 
 `reminder_sent` is only set to `True` on HTTP 2xx. Retries up to 3× on failure.  
 Set `ha_notify_service` in your user profile inside the app.
@@ -887,6 +893,7 @@ The current service file uses `Restart=on-failure`. For an extra layer, add a sy
 | `DATABASE_URL` | no | `sqlite:///./data/projectreef.db` | SQLAlchemy DB URL. Use an absolute path in production: `sqlite:////opt/projectreef/data/projectreef.db` |
 | `HA_URL` | no | — | Home Assistant base URL, e.g. `http://192.168.1.10:8123`. Leave blank to disable reminders |
 | `HA_TOKEN` | no | — | HA long-lived access token |
+| `APP_URL` | no | — | Public base URL of this ProjectReef instance, e.g. `https://reef.your-tailnet.ts.net`. When set, reminder notifications open the task here instead of in Home Assistant. Also settable at runtime in the admin panel |
 | `PORT` | no | `8000` | Listening port (used when running via `python main.py`) |
 | `ALLOWED_ORIGINS` | no | `http://localhost:8000` | Comma-separated list of allowed CORS origins |
 | `ENABLE_DOCS` | no | `false` | Set to `true` to enable Swagger UI at `/docs` and ReDoc at `/redoc` (disable in production) |

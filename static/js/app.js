@@ -3,7 +3,7 @@ import { auth, setToken, isAuthenticated } from "./api.js";
 import { toast, setDisplayTimezone } from "./utils.js";
 import { initInbox }                    from "./inbox.js";
 import { initProjects, openBoardPicker } from "./projects.js";
-import { initTaskDetail } from "./task-detail.js";
+import { initTaskDetail, openTaskDetail } from "./task-detail.js";
 import { initProfile, openProfile } from "./profile.js";
 import { initAdmin } from "./admin.js";
 import { getTimezoneGroups } from "./timezones.js";
@@ -168,6 +168,14 @@ function _showApp() {
       switchTab("tasks",    { replace: true });
     }
   });
+
+  // Deep link from a reminder notification tap (?task=<id>) — open it, then
+  // strip the query param so reload/back doesn't reopen it every time.
+  const deepLinkTaskId = new URLSearchParams(window.location.search).get("task");
+  if (deepLinkTaskId) {
+    history.replaceState(null, "", window.location.pathname);
+    openTaskDetail(deepLinkTaskId);
+  }
 }
 
 function _showAuth() {

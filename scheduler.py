@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 scheduler: AsyncIOScheduler | None = None
 
 
-async def _send_ha_notification(service: str, title: str, message: str, project: str) -> bool:
+async def _send_ha_notification(service: str, title: str, message: str, project: str, task_id: str) -> bool:
     # Read HA config at call time so runtime changes via the admin panel take effect
     # without a service restart.
     ha_url   = cfg.get_ha_url()
@@ -35,6 +35,15 @@ async def _send_ha_notification(service: str, title: str, message: str, project:
         "title": f"To Do: {title}",
         "data": {"project": project},
     }
+
+    # If the admin has configured ProjectReef's own public URL, make the
+    # notification tap-through open that task directly instead of the HA app
+    # (the companion app's default when no url/clickAction is set).
+    app_url = cfg.get_app_url()
+    if app_url:
+        task_link = f"{app_url}/tasks?task={task_id}"
+        payload["data"]["url"]         = task_link  # iOS companion app
+        payload["data"]["clickAction"] = task_link  # Android companion app
 
     for attempt in range(3):
         try:
@@ -74,7 +83,7 @@ async def send_due_reminders():
 
             project_name = task.project.name if task.project else "Inbox"
             sent = await _send_ha_notification(
-                user.ha_notify_service, task.title, task.title, project_name
+                user.ha_notify_service, task.title, task.title, project_name, task.id
             )
             if sent:
                 task.reminder_sent = True

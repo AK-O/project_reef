@@ -56,6 +56,16 @@ def get_ha_url() -> str:
     return (load().get("ha_url") or os.getenv("HA_URL", "")).rstrip("/")
 
 
+def get_app_url() -> str:
+    """Public base URL of this ProjectReef instance (e.g. https://reef.your-tailnet.ts.net).
+
+    Used to build the tap-through link on HA reminder notifications so they open
+    the task in ProjectReef instead of Home Assistant. Distinct from HA_URL, which
+    points at the Home Assistant server.
+    """
+    return (load().get("app_url") or os.getenv("APP_URL", "")).rstrip("/")
+
+
 def get_ha_token() -> str:
     stored = load().get("ha_token") or ""
     if stored:
