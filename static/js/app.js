@@ -110,6 +110,10 @@ async function boot() {
 }
 
 function _showApp() {
+  // Capture before switchTab() below rewrites the URL (via history.replaceState)
+  // and drops the query string.
+  const deepLinkTaskId = new URLSearchParams(window.location.search).get("task");
+
   document.getElementById("auth-screen").classList.remove("active");
   document.getElementById("main-screen").classList.add("active");
 
@@ -169,13 +173,9 @@ function _showApp() {
     }
   });
 
-  // Deep link from a reminder notification tap (?task=<id>) — open it, then
-  // strip the query param so reload/back doesn't reopen it every time.
-  const deepLinkTaskId = new URLSearchParams(window.location.search).get("task");
-  if (deepLinkTaskId) {
-    history.replaceState(null, "", window.location.pathname);
-    openTaskDetail(deepLinkTaskId);
-  }
+  // Deep link from a reminder notification tap (?task=<id>) — open it now
+  // that the tasks tab (and its modal) are wired up.
+  if (deepLinkTaskId) openTaskDetail(deepLinkTaskId);
 }
 
 function _showAuth() {
